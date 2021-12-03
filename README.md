@@ -7,5 +7,6 @@
   - partie non terminée
   - partie terminée (historique)
     - ==> progression, meilleur partie, ect... 
+- Mettre nos tronches à la place des pions 
 
 # Les prérequis
