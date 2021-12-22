@@ -129,11 +129,11 @@ class GameWin(Win):
       self.chrono1 = Label(self.frameStat, text=120, font='Arial 16 bold')
 
     self.A = Label(self.frameStat,font=font2,height=1,border=2,
-          text=(f'{self.NameA} \n {self.game.score[0]}'))#Player A informations
+          text=(f'{self.NameA}\n{self.game.score[0]}'))#Player A informations
     self.tour = Label(self.frameStat,font='Arial 35 bold',height=1,width=1,
           text=('A', 'B'), bg='Black',fg='White')  #Current player turn
     self.B = Label(self.frameStat, font=font2,  height=1, border=2,
-          text=(f'{self.NameB} \n {self.game.score[1]}'))#Player B informations
+          text=(f'{self.NameB}\n{self.game.score[1]}'))#Player B informations
 
     if self.pchrono == True :
       self.chrono2 = Label(self.frameStat, text=120, font='Arial 16 bold')
@@ -147,24 +147,37 @@ class GameWin(Win):
   # ----------------------------------------------------------------------------
   def victory(self):
     """play victory animation"""
+    if self.game.score[0] >= self.score or self.game.score[1] >= self.score:
+      self.game.over=True
+      
     if self.game.over:
       for r in range(self.dim):
         for c in range(self.dim):
           self.frame[r][c].state = 3
-      
-      if self.tour['text']=='A':
-        popup = Win(self, title='RULES', op=10)
-        Label(popup, text= f"The winner is {self.NameA}")
-        Button(popup,text='UNDERSTOOD',command=popup.exit,bg='Black', fg='White',
-               font='Arial 20 bold')
-        popup.wait()
-
-      elif self.tour['text']=='B':
-        popup = Win(self, title='RULES', op=10)
-        Label(popup, text= f"The winner is {self.NameB}")
-        Button(popup,text='UNDERSTOOD',command=popup.exit,bg='Black', fg='White',
-               font='Arial 20 bold')
-        popup.wait()
+      # --Win--
+      if self.tour['text']=='A':winner = self.NameA 
+      if self.tour['text']=='B':winner = self.NameB 
+      popup = Win(self, title='VICTORY', op=10)
+      Label(popup, text="Game Over",font = 'Arial 30 bold underline')
+      Label(popup, text= f"The winner is {winner}. This game lasted {self.globalchrono['text']} seconds")
+      # --Frame--
+      frame = Frame(popup, fold=2)
+      Label(frame, text = f"{self.NameA}'s results :",font = 'Arial 15 underline')
+      Label(frame, text = f"{self.NameB}'s results :",font = 'Arial 15 underline')
+      Label(frame, text = f"{self.game.score[0]} points")
+      Label(frame, text = f"{self.game.score[1]} points")
+      if self.pchrono == True :
+        Label(frame, text = f"{self.chrono1['text']} second(s) remaining")
+        Label(frame, text = f"{self.chrono2['text']} second(s) remaining")
+      # --//--
+      Button(popup,text='UNDERSTOOD',command=self.new_game,bg='Black', fg='White',
+             font='Arial 20 bold')
+      popup.wait()
+  # ----------------------------------------------------------------------------
+  def new_game(self):
+    """New game launcher"""
+    self.exit()
+    ConfigWin()
   # ----------------------------------------------------------------------------
   def tick(self):
     """Manage chrono"""
