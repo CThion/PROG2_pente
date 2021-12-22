@@ -97,7 +97,7 @@ class GameWin(Win):
       row0, col0 = self.game.history[-2]
       #---- rules applications : Game calls ==> updates of state matrice MStates
       self.game(row, col,self.game.playerID)  #update states matrice for player
-      if self.voisinage: 
+      if self.voisinage: #if neighborhood rule is active in settings
           self.game.switch(row0, col0, True)  #erase last switch
           self.game.switch(row, col, False)  #new current switch
       self.game.align(row, col, self.game.playerID)
@@ -227,14 +227,23 @@ class Game(object):
   # ----------------------------------------------------------------------------
   def align(self, row, col, playerID):
     """check if provided move creates align config and return score update"""
+    print("HEYYY")
     gain = 0
     # return 5 points for each detected align pattern
     hori = ''.join([str(token) for token in self.MState[row]])
     verti = ''.join([str(rowlist[col]) for rowlist in self.MState])
-
-    
     diagup = ''
     diagdown = ''
+    #----OPTIMISATION A FAIRE AVEC DU MIN ET DU MAX POUR FACTORISER LES DEUX CAS
+    if row+col<=self.dim-1:
+        for irow in range(0, col+row+1):
+            jcol=col+row-irow
+            diagup += str(self(irow, jcol))
+    else:
+        for irow in range(row+col-self.dim+1, self.dim):
+            jcol=row+col-irow
+            diagup += str(self(irow, jcol))        
+    #----
     shift = row - col
     if shift < 0:
       rowshift = 0
@@ -242,15 +251,14 @@ class Game(object):
     else:
       rowshift = shift
       colshift = 0  #under diagdown
-    #----
     coldiag = colshift
     for rowdiag in self.MState[0 + rowshift:self.dim - colshift]:
       diagdown += str(rowdiag[coldiag])
       coldiag += 1
-    #----
+    #---- detecting alignment 
     for vect in (hori, verti, diagup, diagdown):
       if 5 * str(playerID) in vect: gain += 5
-    self.score[playerID - 1] += gain  #update score
+    self.score[playerID - 1] += gain  #update score /!!!\LIEN NOYAU INTERFACE
 
   # ----------------------------------------------------------------------------
   def capture(self, row, col, player):
