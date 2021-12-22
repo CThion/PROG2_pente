@@ -63,13 +63,10 @@ class GameWin(Win):
     """create and show the game window, according to config parameters"""
     # ----GETTING SETTINGS------------------------------------------------------
     # ----Subsettings ----------------------------------------------------------
-
     self.gchrono = True  #Global chrono condition
     if config.gchrono == 0: self.gchrono = False
-
     self.pchrono = True  #Player chrono condition
     if config.pchrono == 0: self.pchrono = False
-
     self.voisinage = True  #True by default
     if config.voisinage == 0: self.voisinage = False
     # --------------------------------------------------------------------------
@@ -154,12 +151,28 @@ class GameWin(Win):
       for r in range(self.dim):
         for c in range(self.dim):
           self.frame[r][c].state = 3
+      
+      if self.tour['text']=='A':
+        popup = Win(self, title='RULES', op=10)
+        Label(popup, text= f"The winner is {self.NameA}")
+        Button(popup,text='UNDERSTOOD',command=popup.exit,bg='Black', fg='White',
+               font='Arial 20 bold')
+        popup.wait()
+
+      elif self.tour['text']=='B':
+        popup = Win(self, title='RULES', op=10)
+        Label(popup, text= f"The winner is {self.NameB}")
+        Button(popup,text='UNDERSTOOD',command=popup.exit,bg='Black', fg='White',
+               font='Arial 20 bold')
+        popup.wait()
   # ----------------------------------------------------------------------------
   def tick(self):
     """Manage chrono"""
+    self.victory()  #stop the chrono if there's a winner
     if self.pchrono==True :
       if self.chrono1['text']==0 or self.chrono2['text']==0:
         self.game.over=True
+        self.victory()
         return
 
     if self.gchrono == True and self.pchrono == False:
