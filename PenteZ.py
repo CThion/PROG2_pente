@@ -147,19 +147,21 @@ class GameWin(Win):
   # ----------------------------------------------------------------------------
   def victory(self):
     """play victory animation"""
-    if self.game.score[0] >= self.score or self.game.score[1] >= self.score:
+    if self.game.score[0] >= self.score :
+      self.winner = self.NameA
+      self.game.over=True
+    elif self.game.score[1] >= self.score:
+      self.winner = self.NameB
       self.game.over=True
       
     if self.game.over:
       for r in range(self.dim):
         for c in range(self.dim):
           self.frame[r][c].state = 3
-      # --Win--
-      if self.tour['text']=='A':winner = self.NameA 
-      if self.tour['text']=='B':winner = self.NameB 
+      # --Win-- 
       popup = Win(self, title='VICTORY', op=10)
       Label(popup, text="Game Over",font = 'Arial 30 bold underline')
-      Label(popup, text= f"The winner is {winner}. This game lasted {self.globalchrono['text']} seconds")
+      Label(popup, text= f"The winner is {self.winner}. This game lasted {self.globalchrono['text']} seconds")
       # --Frame--
       frame = Frame(popup, fold=2)
       Label(frame, text = f"{self.NameA}'s results :",font = 'Arial 15 underline')
@@ -182,9 +184,16 @@ class GameWin(Win):
   def tick(self):
     """Manage chrono"""
     self.victory()  #stop the chrono if there's a winner
+
     if self.pchrono==True :
-      if self.chrono1['text']==0 or self.chrono2['text']==0:
+      if self.chrono1['text']==0 :
         self.game.over=True
+        self.winner = self.NameB
+        self.victory()
+        return
+      if self.chrono2['text']==0:
+        self.game.over=True
+        self.winner=self.NameA
         self.victory()
         return
 
