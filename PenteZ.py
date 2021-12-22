@@ -161,7 +161,10 @@ class GameWin(Win):
       # --Win-- 
       popup = Win(self, title='VICTORY', op=10)
       Label(popup, text="Game Over",font = 'Arial 30 bold underline')
-      Label(popup, text= f"The winner is {self.winner}. This game lasted {self.globalchrono['text']} seconds")
+      if self.gchrono == True : 
+        Label(popup, text= f"The winner is {self.winner}. This game lasted {self.globalchrono['text']} seconds.")
+      else:
+        Label(popup, text= f"The winner is {self.winner}.")
       # --Frame--
       frame = Frame(popup, fold=2)
       Label(frame, text = f"{self.NameA}'s results :",font = 'Arial 15 underline')
