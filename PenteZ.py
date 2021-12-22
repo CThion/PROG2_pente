@@ -48,6 +48,7 @@ class ConfigWin(Win):
     self.pchrono = MessageDialog.askyesno('YES-NO', message='Add a player turn Chrono ?')
     
     self.voisinage = MessageDialog.askyesno('YES-NO', message='Set the switch rule ?')
+    
 
   def rules(self):
     popup = Win(self, title='RULES', op=10)
@@ -71,7 +72,6 @@ class GameWin(Win):
 
     self.voisinage = True  #True by default
     if config.voisinage == 0: self.voisinage = False
-
     # --------------------------------------------------------------------------
     self.dim = config.dim.state
     self.game = Game(self.dim)  # create kernel class and store it as attribute
@@ -97,8 +97,9 @@ class GameWin(Win):
       row0, col0 = self.game.history[-2]
       #---- rules applications : Game calls ==> updates of state matrice MStates
       self.game(row, col,self.game.playerID)  #update states matrice for player
-      self.game.switch(row0, col0, True)  #erase last switch
-      self.game.switch(row, col, False)  #new current switch
+      if self.voisinage: 
+          self.game.switch(row0, col0, True)  #erase last switch
+          self.game.switch(row, col, False)  #new current switch
       self.game.align(row, col, self.game.playerID)
       self.game.capture(row, col, self.game.playerID)
       self.victory()
