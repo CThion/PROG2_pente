@@ -240,13 +240,13 @@ class Game(object):
   # ----------------------------------------------------------------------------
   def align(self, row, col, playerID):
     """check if provided move creates align config and return score update"""
-    print("HEYYY")
     gain = 0
     # return 5 points for each detected align pattern
     hori = ''.join([str(token) for token in self.MState[row]])
     verti = ''.join([str(rowlist[col]) for rowlist in self.MState])
     diagup = ''
     diagdown = ''
+    #----DIAGUP
     #----OPTIMISATION A FAIRE AVEC DU MIN ET DU MAX POUR FACTORISER LES DEUX CAS
     if row+col<=self.dim-1:
         for irow in range(0, col+row+1):
@@ -256,7 +256,7 @@ class Game(object):
         for irow in range(row+col-self.dim+1, self.dim):
             jcol=row+col-irow
             diagup += str(self(irow, jcol))        
-    #----
+    #----DIADOWN
     shift = row - col
     if shift < 0:
       rowshift = 0
@@ -274,9 +274,19 @@ class Game(object):
     self.score[playerID - 1] += gain  #update score /!!!\LIEN NOYAU INTERFACE
 
   # ----------------------------------------------------------------------------
-  def capture(self, row, col, player):
+  def capture(self, row, col, playerID):
     """check if provided move creates capture config and return score update"""
     # return 1 point for each detected capture pattern
+    gain=0 #initial gain
+    print(playerID)
+    hori = ''.join([str(token) for token in self.MState[row]])
+    verti = ''.join([str(rowlist[col]) for rowlist in self.MState])
+    adversaryID = 2-(1+playerID)%2
+    patern = str(playerID)+2*str(adversaryID)+str(playerID)
+    print('patenr', patern)
+    for vect in (hori, verti):
+      if patern in vect: gain += 1
+    self.score[playerID - 1] += gain  #update score /!!!\LIEN NOYAU INTERFACE
 # ==============================================================================
 if __name__ == "__main__":
   ConfigWin()
