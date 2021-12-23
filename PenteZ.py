@@ -12,31 +12,31 @@ class ConfigWin(Win):
   def __init__(self, dim=8, score=5, nameA='Player A', nameB='Player B'):
     """create and show the configuration window"""
     font = 'Arial 20 bold'
-    Win.__init__(self, title="ConfigWin", op=2, grow=True)  #config window
+    Win.__init__(self, title="ConfigWin", op=2, grow=True,bg='#98f4f3')  #config window
     # --------------------------------------------------------------------------
-    Label(self,text='CONFIGURATION',width=23,bg='Black',fg='White',font=font)
+    Label(self,text='CONFIGURATION',width=23,bg='#1b32c5',fg='#819b93',font=font)
     # --------------------------------------------------------------------------
     frame = Frame(self, fold=2, flow='ES')
     #----
-    Label(frame,text='Name of player A :',width=13,anchor='SW',grow=True)
+    Label(frame,text='Name of player A :',width=13,anchor='SW',grow=True,font='Arial 13 bold')
     self.p1 = Entry(frame)
     #----
-    Label(frame,text='Name of player B :',width=13,anchor='SW',grow=True)
+    Label(frame,text='Name of player B :',width=13,anchor='SW',grow=True,font='Arial 13 bold')
     self.p2 = Entry(frame)
     #----
-    Label(frame,text='Board Dimensions :',width=16,anchor='SW',grow=False)
+    Label(frame,text='Board Dimensions :',width=16,anchor='SW',grow=False,font='Arial 13 bold')
     self.dim = Scale(frame, scale=(dim, 16), flow='W', state=dim)
     #----
-    Label(frame,text='Score for Victory :',width=16,anchor='SW',grow=False)
+    Label(frame,text='Score for Victory :',width=16,anchor='SW',grow=False,font='Arial 13 bold')
     self.score = Scale(frame, scale=(score, 15), flow='W', state=score)
     # --------------------------------------------------------------------------
     self.gchrono = self.pchrono = self.voisinage = 1
-    Button(frame,text='⚙',command=self.settings,bg='Black',fg='White',
+    Button(frame,text='⚙',command=self.settings,bg='#1b32c5',fg='#819b93',
            font=font)
-    Button(frame,text='?',command=self.rules,bg='Black',fg='White',
+    Button(frame,text='?',command=self.rules,bg='#1b32c5',fg='#819b93',
            font=font)
-    Button(frame,text='START',command=lambda: GameWin(self),bg='Black',
-           fg='White',font=font)
+    Button(frame,text='START',command=lambda: GameWin(self),bg='#1b32c5',
+           fg='#819b93',font=font)
     # --------------------------------------------------------------------------
     self.loop()
   # ----------------------------------------------------------------------------
@@ -51,9 +51,9 @@ class ConfigWin(Win):
     
 
   def rules(self):
-    popup = Win(self, title='RULES', op=10)
+    popup = Win(self, title='RULES', op=10,bg='#98f4f3')
     Label(popup, text= "This game is called Pente \n When one of the two players reaches the chosen victory score (set before the game starts), the game is over. \n To collect points, the players can either form a 5-tokens row or column, or set 2 tokens aside an opponent's token. \n Warning ! You cannot set a token on a cell if there's already a token, or if the cell is next to a token set the turn before.")
-    Button(popup,text='UNDERSTOOD',command=popup.exit,bg='Black', fg='White',
+    Button(popup,text='UNDERSTOOD',command=popup.exit,fg='#819b93',bg='#1b32c5',
            font='Arial 20 bold')
     popup.wait()
 #==============================================================================
@@ -102,44 +102,42 @@ class GameWin(Win):
       self.victory()
       #-- convert Game.L state into graphical animation
       self.tour.state = (self.tour.state + 1) % 2  #equivalent to do +=1
-      print('game.score', self.game.score)
       for cell in self.game.Changes:  #update the grid
               self.frame[cell[0]][cell[1]].state = self.game(
                   cell[0], cell[1])
       #-- update score on display
       self.A['text'] = f'{self.NameA} \n {self.game.score[0]}'
       self.B['text'] = f'{self.NameB} \n {self.game.score[1]}'
-      print(f"""
-
-      """)
       self.game.Changes = []
   # ----------------------------------------------------------------------------
   def show(self):
     """show current game board by setting state defined for each grid cell"""
     # --------------------------------------------------------------------------
-    Win.__init__(self,title="Pente",op=2,fold=1,flow='ES',click=self.on_click,
+    Win.__init__(self,title="Pente",op=2,fold=1,flow='ES',click=self.on_click,bg='#98f4f3',
                  grow=False)  #creates window
     font2 = 'Arial 20 bold'
+    images = tuple(Image(file=f"{id}.gif")for id in range(4))  #import image
     # --------------------------------------------------------------------------
     if self.gchrono == True:
+      Label(self,text = 'Global Time :', font="Arial 16 bold underline")
       self.globalchrono = Label(self, text=0, font="Arial 16 bold")
 
-    self.frameStat = Frame(self, flow='ES')
+    time = Frame(self,fold=2,flow='ES')
     if self.pchrono == True :
-      self.chrono1 = Label(self.frameStat, text=120, font='Arial 16 bold')
-
-    self.A = Label(self.frameStat,font=font2,height=1,border=2,
+      Label(time,text = f"{self.NameA}'s time left", font="Arial 16 bold")
+      Label(time,text = f"{self.NameB}'s time left", font="Arial 16 bold")
+      self.chrono1 = Label(time, text=120, font='Arial 16 bold',width=3)
+      self.chrono2 = Label(time, text=120, font='Arial 16 bold',width=3)
+      
+    frameStat = Frame(self, flow='ES')
+    self.A = Label(frameStat,font=font2,fg='blue',border=2,width=10,
           text=(f'{self.NameA}\n{self.game.score[0]}'))#Player A informations
-    self.tour = Label(self.frameStat,font='Arial 35 bold',height=1,width=1,
-          text=('A', 'B'), bg='Black',fg='White')  #Current player turn
-    self.B = Label(self.frameStat, font=font2,  height=1, border=2,
+    self.tour = Label(frameStat,font='Arial 35 bold',width=2,
+          text=('A', 'B'), bg='Black',fg=('#6069f5', '#50db20'))  #Current player turn
+    self.B = Label(frameStat, font=font2,fg='green',border=2,width=10,
           text=(f'{self.NameB}\n{self.game.score[1]}'))#Player B informations
-
-    if self.pchrono == True :
-      self.chrono2 = Label(self.frameStat, text=120, font='Arial 16 bold')
     # --------------------------------------------------------------------------
     self.frame = Frame(self, fold=self.dim, flow='ES')  #grid container
-    images = tuple(Image(file=f"{id}.gif")for id in range(4))  #import image
     for n in range(self.dim * self.dim):  #Creates the grid
       grid = Label(self.frame, image=images)
     # --------------------------------------------------------------------------
@@ -159,7 +157,7 @@ class GameWin(Win):
         for c in range(self.dim):
           self.frame[r][c].state = 3
       # --Win-- 
-      popup = Win(self, title='VICTORY', op=10)
+      popup = Win(self, title='VICTORY', op=10,bg='#98f4f3')
       Label(popup, text="Game Over",font = 'Arial 30 bold underline')
       if self.gchrono == True : 
         Label(popup, text= f"The winner is {self.winner}. This game lasted {self.globalchrono['text']} seconds.")
@@ -175,7 +173,7 @@ class GameWin(Win):
         Label(frame, text = f"{self.chrono1['text']} second(s) remaining")
         Label(frame, text = f"{self.chrono2['text']} second(s) remaining")
       # --//--
-      Button(popup,text='UNDERSTOOD',command=self.new_game,bg='Black', fg='White',
+      Button(popup,text='NEW GAME',command=self.new_game,bg='#1b32c5', fg='#819b93',
              font='Arial 20 bold')
       popup.wait()
   # ----------------------------------------------------------------------------
@@ -303,12 +301,10 @@ class Game(object):
     """check if provided move creates capture config and return score update"""
     # return 1 point for each detected capture pattern
     gain=0 #initial gain
-    print(playerID)
     hori = ''.join([str(token) for token in self.MState[row]])
     verti = ''.join([str(rowlist[col]) for rowlist in self.MState])
     adversaryID = 2-(1+playerID)%2
     patern = str(playerID)+2*str(adversaryID)+str(playerID)
-    print('patenr', patern)
     for vect in (hori, verti):
       if patern in vect: gain += 1
     self.score[playerID - 1] += gain  #update score /!!!\LIEN NOYAU INTERFACE
