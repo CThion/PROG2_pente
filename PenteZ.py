@@ -294,20 +294,32 @@ class Game(object):
     #---- detecting alignment 
     for vect in (hori, verti, diagup, diagdown):
       if 5 * str(playerID) in vect: gain += 5
-    self.score[playerID - 1] += gain  #update score /!!!\LIEN NOYAU INTERFACE
+    self.score[playerID - 1] += gain  #update score
 
   # ----------------------------------------------------------------------------
   def capture(self, row, col, playerID):
     """check if provided move creates capture config and return score update"""
     # return 1 point for each detected capture pattern
+    print('CAPTURE!')
     gain=0 #initial gain
-    hori = ''.join([str(token) for token in self.MState[row]])
+    hori = ''.join([str(token) for token in self.MState[row]
+                    #[col-max(0, col-3) : col+min(self.dim, col+3)] #take 5-longue intervalle around col
+                    ]) #ensure intervalle valid
+    print('hori', hori)
     verti = ''.join([str(rowlist[col]) for rowlist in self.MState])
     adversaryID = 2-(1+playerID)%2
-    patern = str(playerID)+2*str(adversaryID)+str(playerID)
-    for vect in (hori, verti):
-      if patern in vect: gain += 1
-    self.score[playerID - 1] += gain  #update score /!!!\LIEN NOYAU INTERFACE
+    patern = str(playerID)+2*str(adversaryID)+str(playerID) #2112 or 1221
+    #--get every patern index in a list
+    patern_indexs=[]
+    for direction in (hori, verti): #check every directions
+        tampon= [index for index in range(len(direction))
+                           if direction.startswith(patern, index)] #True if a.index(patern)==index
+        if len(tampon)!=0: 
+            for item in tampon: patern_indexs.append(item)
+    print('patern_indexs', patern_indexs)
+    #----update score 
+    gain += len(patern_indexs) #one point for each patern
+    self.score[playerID - 1] += gain  
 # ==============================================================================
 if __name__ == "__main__":
   ConfigWin()
