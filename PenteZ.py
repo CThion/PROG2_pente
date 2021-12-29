@@ -97,8 +97,8 @@ class GameWin(Win):
       if self.voisinage: #if neighborhood rule is active in settings
           self.game.switch(row0, col0, True)  #erase last switch
           self.game.switch(row, col, False)  #new current switch
-      self.game.align(row, col, self.game.playerID)
-      self.game.capture2(row, col, self.game.playerID)
+      self.game.align2(row, col, self.game.playerID)
+      #self.game.capture2(row, col, self.game.playerID)
       self.victory()
       #-- convert Game.L state into graphical animation
       self.tour.state = (self.tour.state + 1) % 2  #equivalent to do +=1
@@ -238,9 +238,10 @@ class Game(object):
   # ----------------------------------------------------------------------------
   def __call__(self, row, col, state=None):
     """get or set state for provided grid cell. Control cell validity (in grid)"""
+    if not 0 <= row < self.dim or not 0 <= col < self.dim: #out of grid
+        #print('out of grid')
+        return 
     if state == None: 
-        if not 0 <= row < self.dim or not 0 <= col < self.dim: #out of grid
-            print('out of grid'); return 
         return self.MState[row][col]  #return cell state
     else:  #change cell state
       assert isinstance(state, int), "state must be an integer"
@@ -250,10 +251,8 @@ class Game(object):
   # ----------------------------------------------------------------------------
   def switch(self, row, col, valid=True):
     """switch valid/invalid state for neighborhood of provided grid cell"""
-    
     #----Neighborhood
-    neighborhood = [(1, 1), (1, 0), (1, -1), (0, 1), (0, -1), (-1, 1),
-                    (-1, 0), (-1, -1)]
+    neighborhood = [(1, 1), (1, 0), (1, -1), (0, 1), (0, -1), (-1, 1), (-1, 0), (-1, -1)]
     for x in neighborhood:
       xrow, xcol = row + x[0], col + x[1]  # x,y neighbor coordinates
       if not 0 <= xrow < self.dim or not 0 <= xcol < self.dim:
@@ -300,18 +299,19 @@ class Game(object):
     self.score[playerID - 1] += gain  #update score
 
   def align2(self, row, col, playerID):
-    neighborhood = [[1, 1], [1, 0], [1, -1], [0, 1]] 
+    print('----ALIGN----')
+    neighborhood = [[0, 1], [1, 0], [-1, 1], [1, 1]] 
                     #(0, -1), (-1, 1), (-1, 0), (-1, -1)]
-    
     for x in neighborhood:
-        line=[]
-        for sens in [-1,1]:
+        line=[playerID]
+        for sens in [1, -1]:
           x=[sens*x[i] for i in range(2)] #both sens of direction
-          tampon=[self(row+k*x[0], col+k*x[1]) for k in range(5)]
-          print('TAMPON', tampon)
+          tampon=[self(row+k*x[0], col+k*x[1]) for k in range(1, 5)]
+          print('TAMPON : ', tampon)
           line+=tampon 
         linestr=''.join([str(l) for l in line])
-        print('line', line, 'linestr', linestr)
+        print('============ line : ', line)
+        print('linestr : ', linestr)
         if 5*str(playerID) in linestr: self.score[playerID - 1] += 5 #update score
       
     # ----------------------------------------------------------------------------
@@ -344,15 +344,14 @@ class Game(object):
   
   def capture2(self, row, col, playerID):
     adversaryID = 2-(1+playerID)%2
-    neighborhood = [(1, 1), (1, 0), (1, -1), (0, 1), (0, -1), (-1, 1),
-                    (-1, 0), (-1, -1)]
-    # diagup0=[]; diagup1=[] #(1,-1) and (-1,1)
-    print('----')
+    neighborhood = [(0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1), (1, 0), (1, 1)]
+    #print('----CAPTURE----')
     for x in neighborhood:
       line=[self(row+k*x[0], col+k*x[1]) for k in range(4)]
       if line == [playerID, adversaryID, adversaryID, playerID]:
           self.score[playerID - 1] += 1 #update score
           for k in range(1,3): self(row+k*x[0], col+k*x[1], 0) #delete advers captured token
+      #print('capture line', line)
           
 # ==============================================================================
 if __name__ == "__main__":
