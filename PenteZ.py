@@ -97,8 +97,8 @@ class GameWin(Win):
       if self.voisinage: #if neighborhood rule is active in settings
           self.game.switch(row0, col0, True)  #erase last switch
           self.game.switch(row, col, False)  #new current switch
-      self.game.align2(row, col, self.game.playerID)
-      #self.game.capture2(row, col, self.game.playerID)
+      self.game.align(row, col, self.game.playerID)
+      self.game.capture(row, col, self.game.playerID)
       self.victory()
       #-- convert Game.L state into graphical animation
       self.tour.state = (self.tour.state + 1) % 2  #equivalent to do +=1
@@ -263,95 +263,29 @@ class Game(object):
         self(xrow, xcol, 0)  #--> black
 
   # ----------------------------------------------------------------------------
+ 
   def align(self, row, col, playerID):
     """check if provided move creates align config and return score update"""
-    gain = 0
-    # return 5 points for each detected align pattern
-    hori = ''.join([str(token) for token in self.MState[row]])
-    verti = ''.join([str(rowlist[col]) for rowlist in self.MState])
-    diagup = ''
-    diagdown = ''
-    #----DIAGUP
-    #----OPTIMISATION A FAIRE AVEC DU MIN ET DU MAX POUR FACTORISER LES DEUX CAS
-    if row+col<=self.dim-1: #under diagonal o/
-        for irow in range(0, col+row+1):
-            jcol=col+row-irow
-            diagup += str(self(irow, jcol))
-    else: #below diagonal /o
-        for irow in range(row+col-self.dim+1, self.dim):
-            jcol=row+col-irow
-            diagup += str(self(irow, jcol))        
-    #----DIADOWN
-    shift = row - col
-    if shift < 0:
-      rowshift = 0
-      colshift = abs(shift)  #below diagdown
-    else:
-      rowshift = shift
-      colshift = 0  #under diagdown
-    coldiag = colshift
-    for rowdiag in self.MState[0 + rowshift:self.dim - colshift]:
-      diagdown += str(rowdiag[coldiag])
-      coldiag += 1
-    #---- detecting alignment 
-    for vect in (hori, verti, diagup, diagdown):
-      if 5 * str(playerID) in vect: gain += 5
-    self.score[playerID - 1] += gain  #update score
-
-  def align2(self, row, col, playerID):
     print('----ALIGN----')
-    neighborhood = [[0, 1], [1, 0], [-1, 1], [1, 1]] 
+    neighborhood = [[0, 1], [1, 0], [-1, 1], [1, 1]] #-> v <- ^
                     #(0, -1), (-1, 1), (-1, 0), (-1, -1)]
     for x in neighborhood:
-        line=[playerID]
-        for sens in [1, -1]:
-          x=[sens*x[i] for i in range(2)] #both sens of direction
-          tampon=[self(row+k*x[0], col+k*x[1]) for k in range(1, 5)]
-          print('TAMPON : ', tampon)
-          line+=tampon 
+        line=[self(row+(-5+k)*x[0], col+(-5+k)*x[1]) for k in range(1,10)]
         linestr=''.join([str(l) for l in line])
-        print('============ line : ', line)
         print('linestr : ', linestr)
-        if 5*str(playerID) in linestr: self.score[playerID - 1] += 5 #update score
-      
-    # ----------------------------------------------------------------------------
+        if 5*str(playerID) in linestr: 
+            print("nice")
+            self.score[playerID - 1] += 5 #update score
+  
   def capture(self, row, col, playerID):
     """check if provided move creates capture config and return score update"""
-    # return 1 point for each detected capture pattern
-    print('CAPTURE!')
-    gain=0 #initial gain
-    hori = ''.join([str(token) for token in self.MState[row]
-                    #[col-max(0, col-3) : col+min(self.dim, col+3)] #take 5-longue intervalle around col
-                    ]) #ensure intervalle valid
-    verti = ''.join([str(rowlist[col]) for rowlist in self.MState])
-    adversaryID = 2-(1+playerID)%2
-    patern = str(playerID)+2*str(adversaryID)+str(playerID) #2112 or 1221
-    #--get every patern index in a list
-    # patern_indexs=[]
-    for directionID in range(2): #check every 8 directions
-        direction = (hori, verti)[directionID]
-        #--get every patern index
-        paterni= [index for index in range(len(direction))
-                           if direction.startswith(patern, index)] #True if a.index(patern)==index
-        # if len(paterni)!=0: #avoid adding empty lists
-            # for item in paterni: patern_indexs.append(item)
-        for index in paterni: pass
-        #--transformation of advers' captured token
-    print('patern_indexs', patern_indexs)
-    #----update score 
-    gain += len(patern_indexs) #one point for each patern
-    self.score[playerID - 1] += gain  
-  
-  def capture2(self, row, col, playerID):
     adversaryID = 2-(1+playerID)%2
     neighborhood = [(0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1), (1, 0), (1, 1)]
-    #print('----CAPTURE----')
     for x in neighborhood:
       line=[self(row+k*x[0], col+k*x[1]) for k in range(4)]
       if line == [playerID, adversaryID, adversaryID, playerID]:
           self.score[playerID - 1] += 1 #update score
           for k in range(1,3): self(row+k*x[0], col+k*x[1], 0) #delete advers captured token
-      #print('capture line', line)
           
 # ==============================================================================
 if __name__ == "__main__":
