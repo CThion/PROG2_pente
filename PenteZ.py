@@ -37,18 +37,33 @@ class ConfigWin(Win):
            font=font)
     Button(frame,text='START',command=lambda: GameWin(self),bg='#1b32c5',
            fg='#819b93',font=font)
+    
+    #---------------------------------------------------------------------------
+    self.gchrono=IntVar(); self.pchrono=IntVar()
+    Button(frame, text='Show', command=lambda:print(f"""
+                                                    gchrono : {self.gchrono.get()}
+                                                    pchrono : {self.pchrono.get()}
+                                                    """))
     # --------------------------------------------------------------------------
     self.loop()
   # ----------------------------------------------------------------------------
   def settings(self):
     """callback for the "POPUP" button"""
-
-    self.gchrono = MessageDialog.askyesno('YES-NO', message='Add a global Chrono ?')
+    settingswin = Win(self, title='POPUP', flow='S', op=10)
+    Label(settingswin, text='SETTINGS', bg='Black', fg='White', font='Arial 20 bold')
+    frame = Frame(settingswin,flow='ES', fold=2)
+    Label(frame, text='Add a global Chrono ?')
+    Checkbutton(frame, text='chrono', variable=self.gchrono)
+    Label(frame, text='Add a player turn Chrono ?')
+    Checkbutton(frame, text='chrono', variable=self.pchrono)
     
-    self.pchrono = MessageDialog.askyesno('YES-NO', message='Add a player turn Chrono ?')
+    #MessageDialog.askyesno('YES-NO', message='Add a global Chrono ?')
+    # self.pchrono = MessageDialog.askyesno('YES-NO', message='Add a player turn Chrono ?')    
+    # self.voisinage = MessageDialog.askyesno('YES-NO', message='Set the switch rule ?')
+    # Button(settingswin, text='Show', command=lambda:print(self.var.get()))
     
-    self.voisinage = MessageDialog.askyesno('YES-NO', message='Set the switch rule ?')
     
+    Button(settingswin, text='CLOSE', command = settingswin.exit, bg='Black', fg='White', font='Arial 20 bold')
 
   def rules(self):
     popup = Win(self, title='RULES', op=10,bg='#98f4f3')
@@ -263,7 +278,6 @@ class Game(object):
         self(xrow, xcol, 0)  #--> black
 
   # ----------------------------------------------------------------------------
- 
   def align(self, row, col, playerID):
     """check if provided move creates align config and return score update"""
     print('----ALIGN----')
@@ -277,6 +291,7 @@ class Game(object):
             print("nice")
             self.score[playerID - 1] += 5 #update score
   
+  # ----------------------------------------------------------------------------
   def capture(self, row, col, playerID):
     """check if provided move creates capture config and return score update"""
     adversaryID = 2-(1+playerID)%2
