@@ -30,7 +30,6 @@ class ConfigWin(Win):
     Label(frame,text='Score for Victory :',width=16,anchor='SW',grow=False,font='Arial 13 bold')
     self.score = Scale(frame, scale=(score, 15), flow='W', state=score)
     # --------------------------------------------------------------------------
-    self.gchrono = self.pchrono = self.voisinage = 1
     Button(frame,text='⚙',command=self.settings,bg='#1b32c5',fg='#819b93',
            font=font)
     Button(frame,text='?',command=self.rules,bg='#1b32c5',fg='#819b93',
@@ -39,7 +38,7 @@ class ConfigWin(Win):
            fg='#819b93',font=font)
     
     #---------------------------------------------------------------------------
-    self.gchrono=IntVar(); self.pchrono=IntVar()
+    self.gchrono=IntVar(); self.pchrono=IntVar();self.voisinage=IntVar()
     Button(frame, text='Show', command=lambda:print(f"""
                                                     gchrono : {self.gchrono.get()}
                                                     pchrono : {self.pchrono.get()}
@@ -49,13 +48,16 @@ class ConfigWin(Win):
   # ----------------------------------------------------------------------------
   def settings(self):
     """callback for the "POPUP" button"""
-    settingswin = Win(self, title='POPUP', flow='S', op=10)
-    Label(settingswin, text='SETTINGS', bg='Black', fg='White', font='Arial 20 bold')
+    settingswin = Win(self, title='POPUP', flow='S', op=10,bg='#98f4f3')
+    Label(settingswin, text='SETTINGS',fg='#819b93',bg='#1b32c5', font='Arial 20 bold')
+
     frame = Frame(settingswin,flow='ES', fold=2)
-    Label(frame, text='Add a global Chrono ?')
-    Checkbutton(frame, text='chrono', variable=self.gchrono)
-    Label(frame, text='Add a player turn Chrono ?')
-    Checkbutton(frame, text='chrono', variable=self.pchrono)
+    Label(frame, text='Add a global Chrono ?',font='Arial 13 bold')
+    Checkbutton(frame, variable=self.gchrono)
+    Label(frame, text='Add a player turn Chrono ?',font='Arial 13 bold')
+    Checkbutton(frame, variable=self.pchrono)
+    Label(frame, text='Add the switch rule ?',font='Arial 13 bold')
+    Checkbutton(frame, variable=self.voisinage)
     
     #MessageDialog.askyesno('YES-NO', message='Add a global Chrono ?')
     # self.pchrono = MessageDialog.askyesno('YES-NO', message='Add a player turn Chrono ?')    
@@ -63,7 +65,7 @@ class ConfigWin(Win):
     # Button(settingswin, text='Show', command=lambda:print(self.var.get()))
     
     
-    Button(settingswin, text='CLOSE', command = settingswin.exit, bg='Black', fg='White', font='Arial 20 bold')
+    Button(settingswin, text='CLOSE', command = settingswin.exit, fg='#819b93',bg='#1b32c5', font='Arial 20 bold')
 
   def rules(self):
     popup = Win(self, title='RULES', op=10,bg='#98f4f3')
@@ -79,11 +81,11 @@ class GameWin(Win):
     # ----GETTING SETTINGS------------------------------------------------------
     # ----Subsettings ----------------------------------------------------------
     self.gchrono = True  #Global chrono condition
-    if config.gchrono == 0: self.gchrono = False
+    if config.gchrono.get() == 0: self.gchrono = False
     self.pchrono = True  #Player chrono condition
-    if config.pchrono == 0: self.pchrono = False
+    if config.pchrono.get() == 0: self.pchrono = False
     self.voisinage = True  #True by default
-    if config.voisinage == 0: self.voisinage = False
+    if config.voisinage.get() == 0: self.voisinage = False
     # --------------------------------------------------------------------------
     self.dim = config.dim.state
     self.game = Game(self.dim)  # create kernel class and store it as attribute
