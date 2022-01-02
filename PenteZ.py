@@ -156,7 +156,9 @@ class GameWin(Win):
     self.B = Label(frameStat, font=font2,fg='green',border=2,width=10,
           text=(f'{self.NameB}\n{self.game.score[1]}'))#Player B informations
     # --------------------------------------------------------------------------
-    self.frame = Frame(self, fold=self.dim, flow='ES')  #grid container
+    width, height = self.winfo_screenwidth()-64, self.winfo_screenheight()-64
+    step = min(width/self.dim, height/self.dim)
+    self.frame = Frame(self, fold=self.dim, flow='ES',width=step*self.dim, height=step*self.dim)  #grid container
     for n in range(self.dim * self.dim):  #Creates the grid
       grid = Label(self.frame, image=images)
     # --------------------------------------------------------------------------
