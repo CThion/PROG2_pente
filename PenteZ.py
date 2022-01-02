@@ -43,24 +43,39 @@ class ConfigWin(Win):
     Button(frame,text='START',command=lambda: GameWin(self),bg='#1b32c5',
            fg='#819b93',font=font)
     #---------------------------------------------------------------------------
-    self.gchrono=IntVar(); self.pchrono=IntVar();self.voisinage=IntVar()
+    self.gchrono=IntVar(); self.pchrono=IntVar(); 
+    self.voisinage=IntVar()
+    self.timelimite=120 #time limit per player in seconds
     # --------------------------------------------------------------------------
     self.loop()
   # ----------------------------------------------------------------------------
   def settings(self):
     """callback for the "POPUP" button"""
-    settingswin = Win(self, title='POPUP', flow='S', op=10,bg='#98f4f3')
+    settingswin = Win(self, title='SETTINGS', flow='S', op=10,bg='#98f4f3')
     Label(settingswin, text='SETTINGS',fg='#819b93',bg='#1b32c5',
           font='Arial 20 bold')
-
     frame = Frame(settingswin,flow='ES', fold=2)
-    Label(frame, text='Add a global Chrono ?',font='Arial 13 bold')
+    #----
+    Label(frame, text='Add a global Chrono ?',font='Arial 13 bold',
+          width=30,anchor='W')
     Checkbutton(frame, variable=self.gchrono)
-    Label(frame, text='Add a player turn Chrono ?',font='Arial 13 bold')
+    #----
+    Label(frame, text='Add a player turn Chrono ?',font='Arial 13 bold',
+          width=30,anchor='W')
     Checkbutton(frame, variable=self.pchrono)
-    Label(frame, text='Add the switch rule ?',font='Arial 13 bold')
+    #----
+    Label(frame,text='Time limit per player (seconds)',font='Arial 13 bold',
+          width=30,anchor='W')
+    # ---------------------
+    def save_choosechrono(): 
+      self.timelimite=self.choosechrono.state
+    self.choosechrono = Scale(frame, scale=(60,600), state=120,
+                              command=save_choosechrono)
+    #----------------------
+    Label(frame, text='Add the switch rule ?',font='Arial 13 bold',width=30,
+          anchor='W')
     Checkbutton(frame, variable=self.voisinage)
- 
+    #----
     Button(settingswin, text='CLOSE', command = settingswin.exit,
            fg='#819b93',bg='#1b32c5', font='Arial 20 bold')
   # ----------------------------------------------------------------------------
@@ -82,6 +97,7 @@ class GameWin(Win):
     """create and show the game window, according to config parameters"""
     # ----GETTING SETTINGS------------------------------------------------------
     # ----Subsettings ----------------------------------------------------------
+    self.choosechrono = config.timelimite
     self.gchrono = True  #Global chrono condition
     if config.gchrono.get() == 0: self.gchrono = False
     self.pchrono = True  #Player chrono condition
@@ -110,7 +126,7 @@ class GameWin(Win):
       self.game.playerID=2-(1 + self.game.playerID) % 2#update player id in(1, 2)
       row, col = widget.index  #coordinates of clicked Label
       self.game.history.append((row, col))
-      row0, col0 = self.game.history[-2]
+      row0, col0 = self.game.history[-2] #get last move before current clicl
       #---- rules applications : Game calls ==> updates of state matrice MStates
       self.game(row, col,self.game.playerID)  #update states matrice for player
       if self.voisinage: #if neighborhood rule is active in settings
@@ -132,7 +148,8 @@ class GameWin(Win):
   def show(self):
     """show current game board by setting state defined for each grid cell"""
     # --------------------------------------------------------------------------
-    Win.__init__(self,title="Pente",op=2,fold=1,flow='ES',click=self.on_click,bg='#98f4f3',
+    Win.__init__(self,title="Pente",op=2,fold=1,flow='ES',click=self.on_click,
+                 bg='#98f4f3',
                  grow=False)  #creates window
     font2 = 'Arial 20 bold'
     images = tuple(Image(file=f"{id}.gif")for id in range(4))  #import image
@@ -145,27 +162,30 @@ class GameWin(Win):
     if self.pchrono == True :
       Label(time,text = f"{self.NameA}'s time left", font="Arial 16 bold")
       Label(time,text = f"{self.NameB}'s time left", font="Arial 16 bold")
-      self.chrono1 = Label(time, text=120, font='Arial 16 bold',width=3)
-      self.chrono2 = Label(time, text=120, font='Arial 16 bold',width=3)
+      self.chrono1=Label(time,text=self.choosechrono,font='Arial 16 bold',
+                         width=3)
+      self.chrono2=Label(time,text=self.choosechrono,font='Arial 16 bold',
+                         width=3)
       
     frameStat = Frame(self, flow='ES')
     self.A = Label(frameStat,font=font2,fg='blue',border=2,width=10,
           text=(f'{self.NameA}\n{self.game.score[0]}'))#Player A informations
     self.tour = Label(frameStat,font='Arial 35 bold',width=2,
-          text=('A', 'B'), bg='Black',fg=('#6069f5', '#50db20'))  #Current player turn
+          text=('A','B'),bg='Black',fg=('#6069f5','#50db20'))#Current player turn
     self.B = Label(frameStat, font=font2,fg='green',border=2,width=10,
           text=(f'{self.NameB}\n{self.game.score[1]}'))#Player B informations
     # --------------------------------------------------------------------------
     width, height = self.winfo_screenwidth()-64, self.winfo_screenheight()-64
     step = min(width/self.dim, height/self.dim)
-    self.frame = Frame(self, fold=self.dim, flow='ES',width=step*self.dim, height=step*self.dim)  #grid container
+    self.frame = Frame(self, fold=self.dim, flow='ES',
+                       width=step*self.dim, height=step*self.dim)#grid container
     for n in range(self.dim * self.dim):  #Creates the grid
       grid = Label(self.frame, image=images)
     # --------------------------------------------------------------------------
     self.after(2000,self.tick);self.loop()
   # ----------------------------------------------------------------------------
   def victory(self):
-    """play victory animation"""
+    """check victory condition and play victory animation"""
     if self.game.score[0] >= self.score :
       self.winner = self.NameA
       self.game.over=True
@@ -181,13 +201,14 @@ class GameWin(Win):
       popup = Win(self, title='VICTORY', op=10,bg='#98f4f3')
       Label(popup, text="Game Over",font = 'Arial 30 bold underline')
       if self.gchrono == True : 
-        Label(popup, text= f"The winner is {self.winner}. This game lasted {self.globalchrono['text']} seconds.")
+        Label(popup, text= f"The winner is {self.winner}. This game lasted \
+{self.globalchrono['text']} seconds.")
       else:
         Label(popup, text= f"The winner is {self.winner}.")
       # --Frame--
       frame = Frame(popup, fold=2)
-      Label(frame, text = f"{self.NameA}'s results :",font = 'Arial 15 underline')
-      Label(frame, text = f"{self.NameB}'s results :",font = 'Arial 15 underline')
+      Label(frame, text = f"{self.NameA}'s results :",font='Arial 15 underline')
+      Label(frame, text = f"{self.NameB}'s results :",font='Arial 15 underline')
       Label(frame, text = f"{self.game.score[0]} points")
       Label(frame, text = f"{self.game.score[1]} points")
       if self.pchrono == True :
@@ -201,8 +222,7 @@ class GameWin(Win):
   # ----------------------------------------------------------------------------
   def new_game(self):
     """New game launcher"""
-    self.exit()
-    ConfigWin()
+    self.exit();ConfigWin()
   # ----------------------------------------------------------------------------
   def tick(self):
     """Manage chrono"""
@@ -212,10 +232,12 @@ class GameWin(Win):
       if self.chrono1['text']==0 :
         self.game.over=True
         self.winner = self.NameB
+        self.victory()
         return
       if self.chrono2['text']==0:
         self.game.over=True
         self.winner=self.NameA
+        self.victory()
         return
     #----Global chrono only
     if self.gchrono == True and self.pchrono == False:
@@ -249,7 +271,7 @@ class Game(object):
     self.over = False  #game over indicator
     self.dim = dim
     self.history = [(0, 0)]#storages every players moves from start to game over
-    self.MState = [dim * [0].copy()for _ in range(dim)]#bijection with grid states
+    self.MState=[dim * [0].copy()for _ in range(dim)]#bijection with grid states
     self.Changes = []  #list of points modified by current move
     self.score = [0, 0]  #storage of players score
     self.playerID = 2  #last player who played, 2 by default for the first move
@@ -268,7 +290,7 @@ class Game(object):
   def switch(self, row, col, valid=True):
     """switch valid/invalid state for neighborhood of provided grid cell"""
     #----Neighborhood
-    neighborhood = [(1, 1), (1, 0), (1, -1), (0, 1), (0, -1), (-1, 1), (-1, 0), (-1, -1)]
+    neighborhood=[(1, 1),(1, 0),(1, -1),(0, 1),(0, -1),(-1, 1),(-1, 0),(-1, -1)]
     for x in neighborhood:
       xrow, xcol = row + x[0], col + x[1]  # x,y neighbor coordinates
       if not 0 <= xrow < self.dim or not 0 <= xcol < self.dim:
@@ -277,7 +299,6 @@ class Game(object):
         self(xrow, xcol, 3)  #--> grey
       elif valid and self.MState[xrow][xcol] == 3:  #if grey cell
         self(xrow, xcol, 0)  #--> black
-
   # ----------------------------------------------------------------------------
   def align(self, row, col, playerID):
     """check if provided move creates align config and return score update"""
@@ -296,7 +317,8 @@ class Game(object):
       line=[self(row+k*x[0], col+k*x[1]) for k in range(4)]
       if line == [playerID, adversaryID, adversaryID, playerID]:
           self.score[playerID - 1] += 1 #update score
-          for k in range(1,3):self(row+k*x[0],col+k*x[1],0)#delete advers captured token
+          for k in range(1,3):self(row+k*x[0],col+k*x[1],0)#delete opponent
+                                                           #captured token
 # ==============================================================================
 if __name__ == "__main__":
   ConfigWin()
