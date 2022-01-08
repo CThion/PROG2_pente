@@ -45,14 +45,15 @@ MtestAlign=[
       [0,0,0,0,0,2,0],
       [0,0,2,2,2,0,2]
     ]
+B=A=0
 MtestCapture=[
-    [2,0,0,0,0,0,0],
+    [2,0,0,1,2,B,1],#0,5
     [0,1,0,0,0,0,0],
     [0,0,1,0,1,0,0],
-    [0,0,0,B,0,0,0],
-    [0,0,2,0,0,0,0],
-    [2,A,1,B,0,0,0],
-    [0,0,0,0,0,0,0],
+    [0,0,0,B,0,0,1],#3,3
+    [0,0,2,0,0,0,2],
+    [2,A,1,B,0,0,2],#5,1 ; 5,3
+    [0,0,0,1,2,2,A],#6,6
     ]
 
 code=f"""
@@ -60,6 +61,11 @@ code=f"""
 p = GameDemo(7)
 print(p)
 p
+
+#---------__call__--------
+print(p(6,0))
+p(6,0,2)
+print(p, p(6,0))
 
 #--------rules--------
 p.on_clic(1,1); print(p)
@@ -101,8 +107,28 @@ print(p)
 p
 
 #----capture----
+p = GameDemo(7)
+p.MState=MtestCapture
+print(p)
 
+p.on_clic(3,3) #diagonal down
+print(p)
+p
 
+p.on_clic(5,1) #diagonal up
+print(p)
+p
 
+p.on_clic(5,3) #horizontal
+print(p)
+p
+
+p.on_clic(6,6) #vertical (double)
+print(p)
+p
+
+p.on_clic(0,5) #not working
+print(p)
+p
 """
 testcode(code)
