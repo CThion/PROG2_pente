@@ -122,9 +122,9 @@ def grid(matrix, inner=True, outer=True, label=False, size=None):
   frame = repeat([repeat(frame, size, cols) for frame in frame]+[''], 1, rows)
   frame = inject(frame[:-1], matrix, '#'*size).split('\n') # inject matrix
   if label: # add letters for col labels and digits for row labels
-    clabel = ' ABCDEFGHIJKLMNOQRSTUVWXYZ'
+    clabel = ' 0123456789'
     clabel = [(a+b).strip() for a in clabel for b in clabel[1:]][:cols]
-    rlabel = [str(a) if a and b else ' ' for a in range(rows+1) for b in (1,0)]
+    rlabel = [str(a-1) if a and b else ' ' for a in range(rows+1) for b in (1,0)]
     rlabel = ["%*s " % (len(str(rows)), r) for r in rlabel]
     # insert col labels at the top of grid and row labels at the left 
     frame[0:0] = [' ' + ' '.join(c.center(size) for c in clabel)]
